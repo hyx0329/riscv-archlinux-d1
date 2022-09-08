@@ -7,5 +7,6 @@ build:
 	$(error "not implemented yet")
 
 clean:
-	$(error "not implemented yet")
+
+distclean:
 
