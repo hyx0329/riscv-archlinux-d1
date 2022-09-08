@@ -56,7 +56,7 @@ help:
 	@echo " DEVICE        The target block device to install the system."
 
 boot0 u-boot linux: prepare-directory
-	$(MAKE) -C $@
+	$(MAKE) -C $@ build
 	@echo "$@ built"
 
 download-rootfs:
