@@ -1,5 +1,5 @@
 
-.PHONY: build clean
+.PHONY: build clean distclean
 
 .DEFAULT: build
 
@@ -35,6 +35,12 @@ build-bootscr: boot.scr
 clean:
 	if [ -d opensbi ]; then $(MAKE) -C opensbi clean; fi
 	if [ -d u-boot ]; then $(MAKE) -C u-boot clean; fi
+	rm -f boot.scr
+	rm -f u-boot.toc1
+
+distclean:
+	rm -rf opensbi
+	rm -rf u-boot
 	rm -f boot.scr
 	rm -f u-boot.toc1
 
