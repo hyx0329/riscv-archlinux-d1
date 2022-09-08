@@ -6,7 +6,7 @@
 build: build-opensbi build-u-boot-toc build-bootscr
 
 opensbi/build/platform/generic/firmware/fw_dynamic.bin:
-	git clone "$(SOURCE_OPENSBI)" -b d1-wip --depth=1 opensbi
+	[ -d opensbi ] || git clone "$(SOURCE_OPENSBI)" -b d1-wip --depth=1 opensbi
 	$(MAKE) -C opensbi CROSS_COMPILE="$(CROSS_COMPILE)" PLATFORM=generic FW_PIC=y FW_OPTIONS=0x2
 	#cp opensbi/build/platform/generic/firmware/fw_dynamic.bin "$(OUTPUT_DIR)"
 

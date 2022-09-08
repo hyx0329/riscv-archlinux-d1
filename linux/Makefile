@@ -99,7 +99,7 @@ $(BUILD_DIR)/arch/riscv/boot/Image.gz: patch-source
 	cp $(BUILD_DIR)/arch/riscv/boot/Image.gz "$(ARTIFACTS_OUTPUT_DIR)"
 
 rtl8723ds/8723ds.ko: $(BUILD_DIR)/arch/riscv/boot/Image.gz
-	[ ! -d rtl8723ds ] && git clone https://github.com/lwfinger/rtl8723ds.git rtl8723ds
+	[ -d rtl8723ds ] || git clone https://github.com/lwfinger/rtl8723ds.git rtl8723ds
 	make -C rtl8723ds $(BUILD_ARGS) KSRC=../$(BUILD_DIR) modules
 	cp rtl8723ds/8723ds.ko $(ARTIFACTS_OUTPUT_DIR)
 

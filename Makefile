@@ -67,7 +67,24 @@ image: boot0 u-boot linux download-rootfs
 	@echo "start building $@"
 	$(error "not implemented yet")
 
-install: boot0 u-boot linux download-rootfs
+$(ARTIFACTS_OUTPUT_DIR)/boot0_sdcard_sun20iw1p1.bin: boot0
+$(ARTIFACTS_OUTPUT_DIR)/boot.scr: u-boot
+$(ARTIFACTS_OUTPUT_DIR)/u-boot.toc1: u-boot
+$(ARTIFACTS_OUTPUT_DIR)/Image: linux
+$(ARTIFACTS_OUTPUT_DIR)/Image.gz: linux
+$(ARTIFACTS_OUTPUT_DIR)/8723ds.ko: linux
+rootfs/$(ARCHIVE_ROOTFS): download-rootfs
+
+artifacts: \
+  $(ARTIFACTS_OUTPUT_DIR)/boot0_sdcard_sun20iw1p1.bin \
+  $(ARTIFACTS_OUTPUT_DIR)/boot.scr \
+  $(ARTIFACTS_OUTPUT_DIR)/u-boot.toc1 \
+  $(ARTIFACTS_OUTPUT_DIR)/Image \
+  $(ARTIFACTS_OUTPUT_DIR)/Image.gz \
+  $(ARTIFACTS_OUTPUT_DIR)/8723ds.ko \
+  rootfs/$(ARCHIVE_ROOTFS)
+
+install: artifacts
 	@echo "start installing to device: $(DEVICE)"
 	$(error "not implemented yet")
 
@@ -75,7 +92,7 @@ clean-boot0 clean-u-boot clean-linux:
 	@make -C $(subst clean-,,$@) clean
 
 distclean-boot0 distclean-u-boot distclean-linux:
-	@make -C $(subst distclean-,,$@) clean
+	@make -C $(subst distclean-,,$@) distclean
 
 clean-all: clean-boot0 clean-u-boot clean-linux
 
