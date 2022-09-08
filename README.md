@@ -7,9 +7,9 @@ Just for fun ;)
 ## How to use
 
 + help: `make help`
-+ build all(without image): `make`
++ build all(without image): `make artifacts`
     - rootfs downloaded in `rootfs`
     - all other artifacts in `output` by default
-+ build image: `make IMAGE=/path/to/image image`
-+ install: `make DEVICE=/path/to/block/device install`
++ build image: `make IMAGE=/path/to/image image` (TBW)
++ install: `make DEVICE=/path/to/block/device install` (TBW)
 

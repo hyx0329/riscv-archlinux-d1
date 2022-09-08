@@ -41,12 +41,12 @@ prepare-directory: check-executables
 
 help:
 	@echo "Usage:"
-	@echo " build everything except image: make"
+	@echo " build everything except image: make artifacts"
 	@echo " build a raw image:             make IMAGE=/path/to/img image"
 	@echo " install everything:            make DEVICE=/path/to/block/device install"
 	@echo " clean up:                      make clean"
 	@echo ""
-	@echo "Other available build targets:"
+	@echo "Other useful build targets:"
 	@echo " boot0"
 	@echo " u-boot"
 	@echo " linux"
