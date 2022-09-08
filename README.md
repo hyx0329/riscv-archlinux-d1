@@ -1,13 +1,15 @@
 # RISCV ArchLinux for D1
 
-Based on https://github.com/sehraf/riscv-arch-image-builder .
+A Makefile based reimplementation of https://github.com/sehraf/riscv-arch-image-builder .
 
-Rewritten in Makefile
+Just for fun ;)
 
 ## How to use
 
 + help: `make help`
 + build all(without image): `make`
+    - rootfs downloaded in `rootfs`
+    - all other artifacts in `output` by default
 + build image: `make IMAGE=/path/to/image image`
 + install: `make DEVICE=/path/to/block/device install`
 
