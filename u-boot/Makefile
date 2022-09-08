@@ -7,7 +7,7 @@ build: build-opensbi build-u-boot-toc build-bootscr
 
 opensbi/build/platform/generic/firmware/fw_dynamic.bin:
 	[ -d opensbi ] || git clone "$(SOURCE_OPENSBI)" -b d1-wip --depth=1 opensbi
-	$(MAKE) -C opensbi CROSS_COMPILE="$(CROSS_COMPILE)" PLATFORM=generic FW_PIC=y FW_OPTIONS=0x2
+	+$(MAKE) -C opensbi CROSS_COMPILE="$(CROSS_COMPILE)" PLATFORM=generic FW_PIC=y FW_OPTIONS=0x2
 	#cp opensbi/build/platform/generic/firmware/fw_dynamic.bin "$(OUTPUT_DIR)"
 
 build-opensbi: opensbi/build/platform/generic/firmware/fw_dynamic.bin
@@ -15,8 +15,8 @@ build-opensbi: opensbi/build/platform/generic/firmware/fw_dynamic.bin
 u-boot/u-boot:
 	if [ ! -d "u-boot" ]; then git clone "$(SOURCE_UBOOT)" u-boot; fi
 	cd u-boot; git checkout $(COMMIT_UBOOT); git reset --hard $(COMMIT_UBOOT); git apply ../uboot-makefile.patch
-	$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" nezha_defconfig
-	$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)"
+	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" nezha_defconfig
+	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)"
 
 build-u-boot: u-boot/u-boot
 
@@ -33,8 +33,8 @@ boot.scr: build-u-boot
 build-bootscr: boot.scr
 
 clean:
-	if [ -d opensbi ]; then $(MAKE) -C opensbi clean; fi
-	if [ -d u-boot ]; then $(MAKE) -C u-boot clean; fi
+	+if [ -d opensbi ]; then $(MAKE) -C opensbi clean; fi
+	+if [ -d u-boot ]; then $(MAKE) -C u-boot clean; fi
 	rm -f boot.scr
 	rm -f u-boot.toc1
 

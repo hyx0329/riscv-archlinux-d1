@@ -56,11 +56,11 @@ help:
 	@echo " DEVICE        The target block device to install the system."
 
 boot0 u-boot linux: prepare-directory
-	$(MAKE) -C $@ build
+	+$(MAKE) -C $@ build
 	@echo "$@ built"
 
 download-rootfs:
-	$(MAKE) -C rootfs download
+	+$(MAKE) -C rootfs download
 	@echo "$(ARCHIVE_ROOTFS) downloaded."
 
 image: boot0 u-boot linux download-rootfs
@@ -89,10 +89,10 @@ install: artifacts
 	$(error "not implemented yet")
 
 clean-boot0 clean-u-boot clean-linux:
-	@make -C $(subst clean-,,$@) clean
+	+$(MAKE) -C $(subst clean-,,$@) clean
 
 distclean-boot0 distclean-u-boot distclean-linux:
-	@make -C $(subst distclean-,,$@) distclean
+	+$(MAKE) -C $(subst distclean-,,$@) distclean
 
 clean-all: clean-boot0 clean-u-boot clean-linux
 

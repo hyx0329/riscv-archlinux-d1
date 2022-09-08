@@ -91,16 +91,16 @@ patch-source: fetch-source
 	# enable binfmt_misc
 	echo 'CONFIG_BINFMT_MISC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	# prepare build directory
-	$(MAKE) $(BUILD_ARGS) -C $(SOURCE_DIR) O=../$(BUILD_DIR) nezha_defconfig
+	+$(MAKE) $(BUILD_ARGS) -C $(SOURCE_DIR) O=../$(BUILD_DIR) nezha_defconfig
 
 $(BUILD_DIR)/arch/riscv/boot/Image.gz: patch-source
-	$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
+	+$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
 	cp $(BUILD_DIR)/arch/riscv/boot/Image "$(ARTIFACTS_OUTPUT_DIR)"
 	cp $(BUILD_DIR)/arch/riscv/boot/Image.gz "$(ARTIFACTS_OUTPUT_DIR)"
 
 rtl8723ds/8723ds.ko: $(BUILD_DIR)/arch/riscv/boot/Image.gz
 	[ -d rtl8723ds ] || git clone https://github.com/lwfinger/rtl8723ds.git rtl8723ds
-	make -C rtl8723ds $(BUILD_ARGS) KSRC=../$(BUILD_DIR) modules
+	+$(MAKE) -C rtl8723ds $(BUILD_ARGS) KSRC=../$(BUILD_DIR) modules
 	cp rtl8723ds/8723ds.ko $(ARTIFACTS_OUTPUT_DIR)
 
 build: $(BUILD_DIR)/arch/riscv/boot/Image.gz rtl8723ds/8723ds.ko
