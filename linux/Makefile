@@ -20,9 +20,11 @@ fetch-source:
 	    exit 1; \
 		fi; \
 	fi;
+	touch $(SOURCE_DIR)/.scmversion
 
 patch-source: fetch-source
 	echo "CONFIG_LOCALVERSION=$(KERNEL_RELEASE)" >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo "CONFIG_LOCALVERSION_AUTO=n" >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	# enable WiFi
 	echo 'CONFIG_WIRELESS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	echo 'CONFIG_CFG80211=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
@@ -88,6 +90,7 @@ patch-source: fetch-source
 	echo 'CONFIG_VIDEO_SUNXI_CEDRUS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	# enable binfmt_misc
 	echo 'CONFIG_BINFMT_MISC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	# prepare build directory
 	$(MAKE) $(BUILD_ARGS) -C $(SOURCE_DIR) O=../$(BUILD_DIR) nezha_defconfig
 
 $(BUILD_DIR)/arch/riscv/boot/Image.gz: patch-source
