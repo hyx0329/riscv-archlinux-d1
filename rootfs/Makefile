@@ -8,5 +8,7 @@ $(ARCHIVE_ROOTFS):
 download: $(ARCHIVE_ROOTFS)
 
 clean:
-	# stub
+
+distclean:
+	rm *.tar.zst
 
