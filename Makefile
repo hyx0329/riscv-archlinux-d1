@@ -4,10 +4,11 @@ IMAGE 		 ?= archlinux_d1_full.img
 CROSS_COMPILE ?= riscv64-linux-gnu-
 OUTPUT_DIR ?= output
 ARTIFACTS_OUTPUT_DIR = $(abspath $(OUTPUT_DIR))
+ARCH       ?= riscv
 
 SOURCE_BOOT0 ?= https://github.com/smaeul/sun20i_d1_spl
 SOURCE_OPENSBI ?= https://github.com/smaeul/opensbi
-SOURCE_U-BOOT ?= https://github.com/smaeul/u-boot
+SOURCE_UBOOT ?= https://github.com/smaeul/u-boot
 SOURCE_LINUX ?= https://github.com/smaeul/linux
 
 COMMIT_BOOT0 ?= 882671fcf53137aaafc3a94fa32e682cb7b921f1 # from 14.06.2022
@@ -73,8 +74,16 @@ install: boot0 u-boot linux download-rootfs
 clean-boot0 clean-u-boot clean-linux:
 	@make -C $(subst clean-,,$@) clean
 
+distclean-boot0 distclean-u-boot distclean-linux:
+	@make -C $(subst distclean-,,$@) clean
+
 clean-all: clean-boot0 clean-u-boot clean-linux
 
+distclean-all: distclean-boot0 distclean-u-boot distclean-linux
+
 clean: clean-all
+	rm -rf $(ARTIFACTS_OUTPUT_DIR)
+
+distclean: distclean-all
 	rm -rf $(ARTIFACTS_OUTPUT_DIR)
 
