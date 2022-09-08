@@ -90,11 +90,14 @@ patch-source: fetch-source
 	echo 'CONFIG_VIDEO_SUNXI_CEDRUS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	# enable binfmt_misc
 	echo 'CONFIG_BINFMT_MISC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+
+$(BUILD_DIR)/arch/riscv/boot/Image.gz:
+	+$(MAKE) patch-source
 	# prepare build directory
 	+$(MAKE) $(BUILD_ARGS) -C $(SOURCE_DIR) O=../$(BUILD_DIR) nezha_defconfig
-
-$(BUILD_DIR)/arch/riscv/boot/Image.gz: patch-source
+	# build
 	+$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
+	# save artifacts
 	cp $(BUILD_DIR)/arch/riscv/boot/Image "$(ARTIFACTS_OUTPUT_DIR)"
 	cp $(BUILD_DIR)/arch/riscv/boot/Image.gz "$(ARTIFACTS_OUTPUT_DIR)"
 
