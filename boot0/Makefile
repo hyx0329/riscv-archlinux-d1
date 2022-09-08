@@ -11,7 +11,7 @@ clone_source:
 
 $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin: clone_source
 	$(MAKE) -C "$(CLONE_DIRECTORY)" $(ARGS_BUILD) mmc
-	cp $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin $(ARTIFACTS_OUTPUT_DIR)/boot0.bin
+	cp $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin "$(ARTIFACTS_OUTPUT_DIR)"
 
 build: $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin
 
