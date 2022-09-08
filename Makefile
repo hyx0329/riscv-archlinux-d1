@@ -27,6 +27,8 @@ export
 .PHONY: clean default boot0 u-boot linux image install
 .PHONY: check-% prepare-directory
 
+.DEFAULT: default
+
 default: boot0 u-boot linux download-rootfs
 
 check-executables:
@@ -62,11 +64,11 @@ download-rootfs:
 
 image: boot0 u-boot linux download-rootfs
 	@echo "start building $@"
-	@echo "not implemented!"
+	$(error "not implemented yet")
 
 install: boot0 u-boot linux download-rootfs
 	@echo "start installing to device: $(DEVICE)"
-	@echo "not implemented!"
+	$(error "not implemented yet")
 
 clean-boot0 clean-u-boot clean-linux:
 	@make -C $(subst clean-,,$@) clean

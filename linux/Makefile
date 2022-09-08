@@ -1,11 +1,11 @@
 
 .PHONY: build clean
 
-default: build
+.DEFAULT: build
 
 build:
-	@echo "not implemented yet"
+	$(error "not implemented yet")
 
 clean:
-	@echo "not implemented yet"
+	$(error "not implemented yet")
 
