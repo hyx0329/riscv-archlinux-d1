@@ -115,12 +115,12 @@ kernel_package.tar.gz: $(KERNEL)
 	fakeroot -- bash -c '\
 	set -e; \
 	mkdir "$(PKG_DIR)"; \
-	install -D -o root -g root -m 644 -T ${KERNEL} "$(PKG_DIR)/boot/Image-$(KERNEL_RELEASE)"; \
+	install -D -o root -g root -m 755 -T ${KERNEL} "$(PKG_DIR)/boot/Image-$(KERNEL_RELEASE)"; \
 	install -D -o root -g root -m 644 -T ${KERNEL}.gz "$(PKG_DIR)/boot/Image.gz-$(KERNEL_RELEASE)"; \
-	make -C $(BUILD_DIR) INSTALL_MOD_PATH="$(PKG_DIR)/" ARCH="$(ARCH)" KERNELRELEASE="$(KERNEL_RELEASE)" modules_install; \
-	install -D -o root -g root -m 644 -t "$(PKG_DIR)/lib/modules/$(KERNEL_RELEASE)/kernel/drivers/net/wireless" $(WIFI_MODULE); \
-	rm -f "$(PKG_DIR)/lib/modules/$(KERNEL_RELEASE)/source"; \
-	rm -f "$(PKG_DIR)/lib/modules/$(KERNEL_RELEASE)/build"; \
+	make -C $(BUILD_DIR) INSTALL_MOD_PATH="$(PKG_DIR)/usr" ARCH="$(ARCH)" KERNELRELEASE="$(KERNEL_RELEASE)" modules_install; \
+	install -D -o root -g root -m 644 -t "$(PKG_DIR)/usr/lib/modules/$(KERNEL_RELEASE)/kernel/drivers/net/wireless" $(WIFI_MODULE); \
+	rm -f "$(PKG_DIR)/usr/lib/modules/$(KERNEL_RELEASE)/source"; \
+	rm -f "$(PKG_DIR)/usr/lib/modules/$(KERNEL_RELEASE)/build"; \
 	if tar -c -z -f $@ -C $(PKG_DIR) $$(ls $(PKG_DIR)); then \
 		rm -rf $(PKG_DIR); \
 	else \
@@ -144,7 +144,7 @@ clean: clean-pkg
 	rm -rf $(BUILD_DIR)
 	rm -rf $(PKG_DIR)
 	rm -f kernel.pkg.zst
-	rm -f package.tar.gz
+	rm -f kernel_package.tar.gz
 
 distclean: clean
 	rm -rf $(SOURCE_DIR)
