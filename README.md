@@ -7,9 +7,12 @@ Just for fun ;)
 ## How to use
 
 + help: `make help`
-+ build all(without image): `make artifacts`
++ build all necessary(without image): `make artifacts`
     - rootfs downloaded in `rootfs`
     - all other artifacts in `output` by default
++ build a simple kernel tarball: `make linux-release-tarball`
+    - install it by extract it in the rootfs
+    - real packaging planned
 + build image: `make IMAGE=/path/to/image image` (TBW)
-+ install: `make DEVICE=/path/to/block/device install` (TBW)
++ install to disk: `make DEVICE=/path/to/block/device install` (TBW)
 
