@@ -28,8 +28,8 @@ fetch-source:
 	touch $(SOURCE_DIR)/.scmversion
 
 patch-source: fetch-source
-	echo "CONFIG_LOCALVERSION=$(KERNEL_RELEASE)" >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo "CONFIG_LOCALVERSION_AUTO=n" >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_LOCALVERSION="$(KERNEL_LOCALVERSION)"' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_LOCALVERSION_AUTO=n' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	# enable WiFi
 	echo 'CONFIG_WIRELESS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 	echo 'CONFIG_CFG80211=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
@@ -99,7 +99,7 @@ patch-source: fetch-source
 $(KERNEL):
 	+$(MAKE) patch-source
 	# prepare build directory
-	+$(MAKE) $(BUILD_ARGS) -C $(SOURCE_DIR) O=../$(BUILD_DIR) nezha_defconfig
+	+$(MAKE) -C $(SOURCE_DIR) $(BUILD_ARGS) O=../$(BUILD_DIR) nezha_defconfig
 	# build
 	+$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
 	# save artifacts
@@ -114,13 +114,14 @@ $(WIFI_MODULE): $(KERNEL)
 kernel_package.tar.gz: $(KERNEL)
 	fakeroot -- bash -c '\
 	set -e; \
+	K_VER=$(shell make -C ${BUILD_DIR} -s kernelversion)$(KERNEL_LOCALVERSION); \
 	mkdir "$(PKG_DIR)"; \
-	install -D -o root -g root -m 755 -T ${KERNEL} "$(PKG_DIR)/boot/Image-$(KERNEL_RELEASE)"; \
-	install -D -o root -g root -m 644 -T ${KERNEL}.gz "$(PKG_DIR)/boot/Image.gz-$(KERNEL_RELEASE)"; \
-	make -C $(BUILD_DIR) INSTALL_MOD_PATH="$(PKG_DIR)/usr" ARCH="$(ARCH)" KERNELRELEASE="$(KERNEL_RELEASE)" modules_install; \
-	install -D -o root -g root -m 644 -t "$(PKG_DIR)/usr/lib/modules/$(KERNEL_RELEASE)/kernel/drivers/net/wireless" $(WIFI_MODULE); \
-	rm -f "$(PKG_DIR)/usr/lib/modules/$(KERNEL_RELEASE)/source"; \
-	rm -f "$(PKG_DIR)/usr/lib/modules/$(KERNEL_RELEASE)/build"; \
+	install -D -o root -g root -m 755 -T "$(KERNEL)" "$(PKG_DIR)/boot/Image-$${K_VER}"; \
+	install -D -o root -g root -m 644 -T "$(KERNEL).gz" "$(PKG_DIR)/boot/Image.gz-$${K_VER}"; \
+	make -C $(BUILD_DIR) INSTALL_MOD_PATH="$(PKG_DIR)/usr" ARCH="$(ARCH)" modules_install; \
+	install -D -o root -g root -m 644 -t "$(PKG_DIR)/usr/lib/modules/$${K_VER}/kernel/drivers/net/wireless" $(WIFI_MODULE); \
+	rm -f "$(PKG_DIR)/usr/lib/modules/$${K_VER}/source"; \
+	rm -f "$(PKG_DIR)/usr/lib/modules/$${K_VER}/build"; \
 	if tar -c -z -f $@ -C $(PKG_DIR) $$(ls $(PKG_DIR)); then \
 		rm -rf $(PKG_DIR); \
 	else \

@@ -19,7 +19,8 @@ COMMIT_UBOOT ?= afc07cec423f17ebb4448a19435292ddacf19c9b
 COMMIT_LINUX ?= fe178cf0153d98b71cb01a46c8cc050826a17e77
 KERNEL_TAG ?= riscv/d1-wip
 # kernel release must match commit!
-KERNEL_RELEASE ?= 5.19.0-AllWinnerD1-Smaeul
+KERNEL_RELEASE ?= 5.19.0-rc1-AllWinnerD1-Smaeul
+KERNEL_LOCALVERSION ?= -AllWinnerD1-Smaeul
 
 ARCHIVE_ROOTFS ?= archriscv-20220727.tar.zst
 ARCHIVE_ROOTFS_SOURCE ?= https://archriscv.felixc.at/images/
