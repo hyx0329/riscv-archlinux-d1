@@ -5,8 +5,13 @@
 
 SOURCE_DIR = linux
 BUILD_DIR = linux-build
+PKG_DIR := $(abspath linux-pkg)
 BUILD_ARGS = ARCH=$(ARCH) CROSS_COMPILE=$(CROSS_COMPILE)
 ARTIFACTS_OUTPUT_DIR ?= ./
+KERNEL = $(BUILD_DIR)/arch/riscv/boot/Image
+WIFI_MODULE = rtl8723ds/8723ds.ko
+
+export KERNEL WIFI_MODULE BUILD_DIR
 
 fetch-source:
 	if [ -d $(SOURCE_DIR) ]; then \
@@ -91,25 +96,55 @@ patch-source: fetch-source
 	# enable binfmt_misc
 	echo 'CONFIG_BINFMT_MISC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
 
-$(BUILD_DIR)/arch/riscv/boot/Image.gz:
+$(KERNEL):
 	+$(MAKE) patch-source
 	# prepare build directory
 	+$(MAKE) $(BUILD_ARGS) -C $(SOURCE_DIR) O=../$(BUILD_DIR) nezha_defconfig
 	# build
 	+$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
 	# save artifacts
-	cp $(BUILD_DIR)/arch/riscv/boot/Image "$(ARTIFACTS_OUTPUT_DIR)"
-	cp $(BUILD_DIR)/arch/riscv/boot/Image.gz "$(ARTIFACTS_OUTPUT_DIR)"
+	cp $(KERNEL) "$(ARTIFACTS_OUTPUT_DIR)"
+	cp $(KERNEL).gz "$(ARTIFACTS_OUTPUT_DIR)"
 
-rtl8723ds/8723ds.ko: $(BUILD_DIR)/arch/riscv/boot/Image.gz
+$(WIFI_MODULE): $(KERNEL)
 	[ -d rtl8723ds ] || git clone https://github.com/lwfinger/rtl8723ds.git rtl8723ds
 	+$(MAKE) -C rtl8723ds $(BUILD_ARGS) KSRC=../$(BUILD_DIR) modules
 	cp rtl8723ds/8723ds.ko $(ARTIFACTS_OUTPUT_DIR)
 
-build: $(BUILD_DIR)/arch/riscv/boot/Image.gz rtl8723ds/8723ds.ko
+kernel_package.tar.gz: $(KERNEL)
+	fakeroot -- bash -c '\
+	set -e; \
+	mkdir "$(PKG_DIR)"; \
+	install -D -o root -g root -m 644 -T ${KERNEL} "$(PKG_DIR)/boot/Image-$(KERNEL_RELEASE)"; \
+	install -D -o root -g root -m 644 -T ${KERNEL}.gz "$(PKG_DIR)/boot/Image.gz-$(KERNEL_RELEASE)"; \
+	make -C $(BUILD_DIR) INSTALL_MOD_PATH="$(PKG_DIR)/" ARCH="$(ARCH)" KERNELRELEASE="$(KERNEL_RELEASE)" modules_install; \
+	install -D -o root -g root -m 644 -t "$(PKG_DIR)/lib/modules/$(KERNEL_RELEASE)/kernel/drivers/net/wireless" $(WIFI_MODULE); \
+	rm -f "$(PKG_DIR)/lib/modules/$(KERNEL_RELEASE)/source"; \
+	rm -f "$(PKG_DIR)/lib/modules/$(KERNEL_RELEASE)/build"; \
+	if tar -c -z -f $@ -C $(PKG_DIR) $$(ls $(PKG_DIR)); then \
+		rm -rf $(PKG_DIR); \
+	else \
+		rm $@; \
+	  rm -rf $(PKG_DIR); \
+		exit 1;\
+	fi; \
+	'
+	cp $@ $(ARTIFACTS_OUTPUT_DIR)
 
-clean:
+release-tarball: kernel_package.tar.gz
+release-pkg: kernel_package.tar.gz
+	makepkg -A
+
+build: $(KERNEL) $(WIFI_MODULE)
+
+clean-pkg:
+	rm -rf src pkg
+
+clean: clean-pkg
 	rm -rf $(BUILD_DIR)
+	rm -rf $(PKG_DIR)
+	rm -f kernel.pkg.zst
+	rm -f package.tar.gz
 
 distclean: clean
 	rm -rf $(SOURCE_DIR)
