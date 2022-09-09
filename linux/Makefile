@@ -122,6 +122,7 @@ kernel_package.tar.gz: $(KERNEL)
 	install -D -o root -g root -m 644 -t "$(PKG_DIR)/usr/lib/modules/$${K_VER}/kernel/drivers/net/wireless" $(WIFI_MODULE); \
 	rm -f "$(PKG_DIR)/usr/lib/modules/$${K_VER}/source"; \
 	rm -f "$(PKG_DIR)/usr/lib/modules/$${K_VER}/build"; \
+	depmod -a -b "$(PKG_DIR)/usr" "$${K_VER}"; \
 	if tar -c -z -f $@ -C $(PKG_DIR) $$(ls $(PKG_DIR)); then \
 		rm -rf $(PKG_DIR); \
 	else \
