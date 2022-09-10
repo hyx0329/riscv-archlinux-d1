@@ -117,6 +117,7 @@ kernel_package.tar.gz: $(KERNEL)
 	K_VER=$(shell make -C ${BUILD_DIR} -s kernelversion)$(KERNEL_LOCALVERSION); \
 	mkdir "$(PKG_DIR)"; \
 	install -D -o root -g root -m 755 -T "$(KERNEL)" "$(PKG_DIR)/boot/Image-$${K_VER}"; \
+	ln -s "Image-$${K_VER}" "$(PKG_DIR)/boot/Image"; \
 	install -D -o root -g root -m 644 -T "$(KERNEL).gz" "$(PKG_DIR)/boot/Image.gz-$${K_VER}"; \
 	make -C $(BUILD_DIR) INSTALL_MOD_PATH="$(PKG_DIR)/usr" ARCH="$(ARCH)" modules_install; \
 	install -D -o root -g root -m 644 -t "$(PKG_DIR)/usr/lib/modules/$${K_VER}/kernel/drivers/net/wireless" $(WIFI_MODULE); \
