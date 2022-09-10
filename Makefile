@@ -5,6 +5,9 @@ CROSS_COMPILE ?= riscv64-linux-gnu-
 OUTPUT_DIR ?= output
 ARTIFACTS_OUTPUT_DIR = $(abspath $(OUTPUT_DIR))
 ARCH       ?= riscv
+CI_BUILD   ?=
+SUDO       ?= $(if $(CI_BUILD),,sudo)
+SHELL      ?= /usr/bin/bash
 
 SOURCE_BOOT0 ?= https://github.com/smaeul/sun20i_d1_spl
 SOURCE_OPENSBI ?= https://github.com/smaeul/opensbi
@@ -26,7 +29,11 @@ ARCHIVE_ROOTFS ?= archriscv-20220727.tar.zst
 ARCHIVE_ROOTFS_SOURCE ?= https://archriscv.felixc.at/images/
 ARCHIVE_ROOTFS_STORAGE = $(ARTIFACTS_OUTPUT_DIR)/$(ARCHIVE_ROOTFS)
 
-REQUIRED_EXECUTABLES = cpio swig riscv64-linux-gnu-gcc
+REQUIRED_EXECUTABLES = \
+	awk bc \
+	cpio swig riscv64-linux-gnu-gcc \
+	dd mkfs.ext2 mkfs.ext2 parted kpartx \
+	mktemp tar gzip zstd
 
 export
 
@@ -80,6 +87,7 @@ $(ARTIFACTS_OUTPUT_DIR)/u-boot.toc1: u-boot
 $(ARTIFACTS_OUTPUT_DIR)/Image: linux
 $(ARTIFACTS_OUTPUT_DIR)/Image.gz: linux
 $(ARTIFACTS_OUTPUT_DIR)/8723ds.ko: linux
+$(ARTIFACTS_OUTPUT_DIR)/kernel_package.tar.gz: linux-release-tarball
 rootfs/$(ARCHIVE_ROOTFS): download-rootfs
 
 ARTIFACTS = \
@@ -89,6 +97,7 @@ ARTIFACTS = \
   $(ARTIFACTS_OUTPUT_DIR)/Image \
   $(ARTIFACTS_OUTPUT_DIR)/Image.gz \
   $(ARTIFACTS_OUTPUT_DIR)/8723ds.ko \
+	$(ARTIFACTS_OUTPUT_DIR)/kernel_package.tar.gz \
   rootfs/$(ARCHIVE_ROOTFS)
 
 artifacts: $(ARTIFACTS)
@@ -99,18 +108,54 @@ install: $(ARTIFACTS)
 	$(error "not implemented yet")
 
 PERCENT := %
+export PERCENT
 $(IMAGE): $(ARTIFACTS)
 	@echo "start building $@"
 	@echo "Prepare image at $(IMAGE)"
-	# Calculate a suitable size, 110% of the minumum (Unit MB) plus 540MB
+	# Calculate a suitable size, 150% of the minumum (Unit MB) plus 340MB
 	# Create a suitable empty file
-	ROOTFS_SIZE=$$(tar -t -v --zstd -f rootfs/$(ARCHIVE_ROOTFS) | awk '{s+=$$3} END{print int(s/1024/1024 * 1.1 + 540)}');\
-	dd if=/dev/zero of="$(IMAGE)" bs=1M count=$${ROOTFS_SIZE}
+	ROOTFS_SIZE=$$(tar -t -v --zstd -f rootfs/$(ARCHIVE_ROOTFS) | awk '{s+=$$3} END{print int(s/1024/1024 * 1.5)}');\
+	KERNEL_SIZE=$$(tar -t -v --gzip -f "$(ARTIFACTS_OUTPUT_DIR)/kernel_package.tar.gz" | awk '{s+=$$3} END{print int(s/1024/1024 * 1.5)}');\
+	PART_SIZE=$$(echo "$${ROOTFS_SIZE} + $${KERNEL_SIZE} + 340" | bc); \
+	dd if=/dev/zero of="$(IMAGE)" bs=1M count=$${PART_SIZE}
 	# Write partition table on it
 	parted -s -a optimal -- "$(IMAGE)" mklabel gpt
-	parted -s -a optimal -- "$(IMAGE)" mkpart primary ext2 40MiB 500MiB
-	parted -s -a optimal -- "$(IMAGE)" mkpart primary ext4 540MiB 100$${PERCENT}
-	# Write boot things
+	parted -s -a optimal -- "$(IMAGE)" mkpart primary ext2 40MiB 300MiB
+	parted -s -a optimal -- "$(IMAGE)" mkpart primary ext4 340MiB 100$(PERCENT)
+	# Write rootfs, kernel and boot config
+	set -e; \
+	MOUNTPOINT=$(shell mktemp -d); \
+	if [ '/tmp' != "$${MOUNTPOINT:0:4}" ]; then echo "Misbehaved temp dir! Abort!"; exit 1; fi; \
+	echo "Now requires superuser privileges to manipulate the partitions,"; \
+	echo "rootless method haven't been implemented yet."; \
+	echo "So it's dangous, please make sure you trust the script wont break your system."; \
+	export DEVICES=$$($(SUDO) losetup -f -P --show "$(IMAGE)"); \
+	echo "Creating filesystem"; \
+	$(SUDO) mkfs.ext2 -F -L boot $${DEVICES}p1; \
+	$(SUDO) mkfs.ext4 -F -L root $${DEVICES}p2; \
+	echo "Writing rootfs and kernel"; \
+	$(SUDO) mount $${DEVICES}p2 $${MOUNTPOINT}; \
+	$(SUDO) mkdir $${MOUNTPOINT}/boot; \
+	$(SUDO) mount $${DEVICES}p1 $${MOUNTPOINT}/boot; \
+	$(SUDO) tar -x -f rootfs/$(ARCHIVE_ROOTFS) -C $${MOUNTPOINT}; \
+	$(SUDO) tar -x -f "$(ARTIFACTS_OUTPUT_DIR)/kernel_package.tar.gz" -C $${MOUNTPOINT}; \
+	$(SUDO) sh -c "echo '8723ds' >> $${MOUNTPOINT}/etc/modules-load.d/8723ds.conf"; \
+	$(SUDO) mkdir -p $${MOUNTPOINT}/boot/extlinux; \
+	$(SUDO) sh -c "echo 'label default' >> $${MOUNTPOINT}/boot/extlinux/extlinux.conf"; \
+	$(SUDO) sh -c "echo '        linux   ../Image' >> $${MOUNTPOINT}/boot/extlinux/extlinux.conf"; \
+	$(SUDO) sh -c "echo '        append  earlycon=sbi console=ttyS0,115200n8 root=/dev/mmcblk0p2 rootwait cma=96M' >> $${MOUNTPOINT}/boot/extlinux/extlinux.conf"; \
+	echo "generate fstab"; \
+	$(SUDO) sh -c "genfstab -L $${MOUNTPOINT} >> $${MOUNTPOINT}/etc/fstab"; \
+	cat $${MOUNTPOINT}/etc/fstab; \
+	echo "umount"; \
+	$(SUDO) umount $${MOUNTPOINT}/boot; \
+	$(SUDO) umount $${MOUNTPOINT}; \
+	echo "Write bootloader"; \
+	$(SUDO) dd if="$(ARTIFACTS_OUTPUT_DIR)/boot0_sdcard_sun20iw1p1.bin" of="$${DEVICES}" bs=8192 seek=16; \
+	$(SUDO) dd if="$(ARTIFACTS_OUTPUT_DIR)/u-boot.toc1" of="$${DEVICES}" bs=512 seek=32800; \
+	echo "clean up"; \
+	$(SUDO) rm -rf $${MOUNTPOINT}; \
+	$(SUDO) losetup -d $${DEVICES};
 
 image: $(IMAGE)
 
