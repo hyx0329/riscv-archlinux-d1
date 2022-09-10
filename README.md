@@ -18,6 +18,6 @@ Just for fun ;)
     - packaged as `output/kernel_package.tar.gz`
     - install it by extract it in the rootfs
     - real packaging planned
-+ build image: `make IMAGE=/path/to/image image` (TBW)
++ build full image(which can be directly `dd` to your TF Card): `make IMAGE=/path/to/image image`
 + install to disk: `make DEVICE=/path/to/block/device install` (TBW)
 
