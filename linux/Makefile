@@ -102,14 +102,10 @@ $(KERNEL):
 	+$(MAKE) -C $(SOURCE_DIR) $(BUILD_ARGS) O=../$(BUILD_DIR) nezha_defconfig
 	# build
 	+$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
-	# save artifacts
-	cp $(KERNEL) "$(ARTIFACTS_OUTPUT_DIR)"
-	cp $(KERNEL).gz "$(ARTIFACTS_OUTPUT_DIR)"
 
 $(WIFI_MODULE): $(KERNEL)
 	[ -d rtl8723ds ] || git clone https://github.com/lwfinger/rtl8723ds.git rtl8723ds
 	+$(MAKE) -C rtl8723ds $(BUILD_ARGS) KSRC=../$(BUILD_DIR) modules
-	cp rtl8723ds/8723ds.ko $(ARTIFACTS_OUTPUT_DIR)
 
 kernel_package.tar.gz: $(KERNEL)
 	fakeroot -- bash -c '\
@@ -132,13 +128,18 @@ kernel_package.tar.gz: $(KERNEL)
 		exit 1;\
 	fi; \
 	'
-	cp $@ $(ARTIFACTS_OUTPUT_DIR)
 
 release-tarball: kernel_package.tar.gz
 release-pkg: kernel_package.tar.gz
 	makepkg -A
 
-build: $(KERNEL) $(WIFI_MODULE)
+
+FILES_TO_BUILD = $(KERNEL) $(WIFI_MODULE) kernel_package.tar.gz
+
+build: $(FILES_TO_BUILD)
+	@$(foreach filetobuild,$(FILES_TO_BUILD),\
+     $(shell cp $(filetobuild) $(ARTIFACTS_OUTPUT_DIR)))
+	@cp $(KERNEL).gz $(ARTIFACTS_OUTPUT_DIR)
 
 clean-pkg:
 	rm -rf src pkg

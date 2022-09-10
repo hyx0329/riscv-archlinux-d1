@@ -1,6 +1,8 @@
 
 CLONE_DIRECTORY = sun20i_d1_spl
 ARGS_BUILD = CROSS_COMPILE=$(CROSS_COMPILE) p=sun20iw1p1
+FILES_TO_BUILD = \
+	$(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin
 
 .PHONY: default clean clone_source build distclean
 
@@ -12,9 +14,10 @@ clone_source:
 $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin:
 	+$(MAKE) clone_source
 	+$(MAKE) -C "$(CLONE_DIRECTORY)" $(ARGS_BUILD) mmc
-	cp $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin "$(ARTIFACTS_OUTPUT_DIR)"
 
-build: $(CLONE_DIRECTORY)/nboot/boot0_sdcard_sun20iw1p1.bin
+build: $(FILES_TO_BUILD)
+	@$(foreach filetobuild,$(FILES_TO_BUILD),\
+     $(shell cp $(filetobuild) $(ARTIFACTS_OUTPUT_DIR)))
 
 distclean:
 	rm -rf "$(CLONE_DIRECTORY)"

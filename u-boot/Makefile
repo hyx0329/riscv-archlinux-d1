@@ -3,10 +3,13 @@
 
 .DEFAULT: build
 
-build: \
-  opensbi/build/platform/generic/firmware/fw_dynamic.bin \
+FILES_TO_BUILD = \
   boot.scr \
   u-boot.toc1
+
+build: $(FILES_TO_BUILD)
+	@$(foreach filetobuild,$(FILES_TO_BUILD),\
+     $(shell cp $(filetobuild) $(ARTIFACTS_OUTPUT_DIR)))
 
 opensbi/build/platform/generic/firmware/fw_dynamic.bin:
 	[ -d opensbi ] || git clone "$(SOURCE_OPENSBI)" -b d1-wip --depth=1 opensbi
@@ -19,13 +22,11 @@ u-boot/u-boot:
 	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" nezha_defconfig
 	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)"
 
-u-boot.toc1: u-boot/u-boot
+u-boot.toc1: u-boot/u-boot opensbi/build/platform/generic/firmware/fw_dynamic.bin
 	u-boot/tools/mkimage -T sunxi_toc1 -d licheerv_toc1.cfg u-boot.toc1
-	cp u-boot.toc1 "$(ARTIFACTS_OUTPUT_DIR)/u-boot.toc1"
 
 boot.scr: u-boot/u-boot
 	u-boot/tools/mkimage -T script -C none -O linux -A "$(ARCH)" -d bootscr.txt boot.scr
-	cp boot.scr "$(ARTIFACTS_OUTPUT_DIR)/boot.scr"
 
 clean:
 	+if [ -d opensbi ]; then $(MAKE) -C opensbi clean; fi
