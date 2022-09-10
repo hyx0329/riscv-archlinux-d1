@@ -19,5 +19,5 @@ Just for fun ;)
     - install it by extract it in the rootfs
     - real packaging planned
 + build full image(which can be directly `dd` to your TF Card): `make IMAGE=/path/to/image image`
-+ install to disk: `make DEVICE=/path/to/block/device install` (TBW)
++ install to disk: `make DEVICE=/path/to/block/device install`
 
