@@ -32,8 +32,9 @@ ARCHIVE_ROOTFS_STORAGE = $(ARTIFACTS_OUTPUT_DIR)/$(ARCHIVE_ROOTFS)
 REQUIRED_EXECUTABLES = \
 	awk bc \
 	cpio swig riscv64-linux-gnu-gcc \
-	dd mkfs.ext2 mkfs.ext2 parted kpartx \
-	mktemp tar gzip zstd
+	dd mkfs.ext2 mkfs.ext2 parted losetup \
+	mktemp tar gzip zstd \
+	genfstab sh bash sudo
 
 export
 
@@ -108,7 +109,6 @@ install: $(ARTIFACTS)
 	$(error "not implemented yet")
 
 PERCENT := %
-export PERCENT
 $(IMAGE): $(ARTIFACTS)
 	@echo "start building $@"
 	@echo "Prepare image at $(IMAGE)"
@@ -145,7 +145,7 @@ $(IMAGE): $(ARTIFACTS)
 	$(SUDO) sh -c "echo '        linux   ../Image' >> $${MOUNTPOINT}/boot/extlinux/extlinux.conf"; \
 	$(SUDO) sh -c "echo '        append  earlycon=sbi console=ttyS0,115200n8 root=/dev/mmcblk0p2 rootwait cma=96M' >> $${MOUNTPOINT}/boot/extlinux/extlinux.conf"; \
 	echo "generate fstab"; \
-	$(SUDO) sh -c "genfstab -L $${MOUNTPOINT} >> $${MOUNTPOINT}/etc/fstab"; \
+	$(SUDO) sh -c "genfstab -U $${MOUNTPOINT} >> $${MOUNTPOINT}/etc/fstab"; \
 	cat $${MOUNTPOINT}/etc/fstab; \
 	echo "umount"; \
 	$(SUDO) umount $${MOUNTPOINT}/boot; \
