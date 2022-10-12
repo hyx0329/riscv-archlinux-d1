@@ -19,7 +19,7 @@ fetch-source:
 	 	git reset --hard $(COMMIT_LINUX); \
 	else \
 	  git clone --depth 1 "$(SOURCE_LINUX)" -b "$(KERNEL_TAG)" $(SOURCE_DIR); \
-	  if [ "$(COMMIT_LINUX)" != "$$(git rev-parse HEAD)" ]; then \
+	  if [ "$(COMMIT_LINUX)" != "$$(git --git-dir=$(SOURCE_DIR)/.git --work-tree=$(SOURCE_DIR) rev-parse HEAD)" ]; then \
 		  echo "Commit mismatch!"; \
 			rm -rf $(SOURCE_DIR); \
 	    exit 1; \
