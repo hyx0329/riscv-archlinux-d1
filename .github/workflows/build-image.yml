@@ -37,6 +37,6 @@ jobs:
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
-          name: system-image
+          name: archlinux-d1-${{ github.event.commits[0].id }}.img.xz
           path: archlinux-d1-${{ github.event.commits[0].id }}.img.xz
-          
+
