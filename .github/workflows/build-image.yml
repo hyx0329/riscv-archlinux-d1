@@ -16,7 +16,7 @@ jobs:
       - name: Prepare environment
         run: |
           sudo apt update && sudo apt install -y \
-            build-essential coreutils git \
+            build-essential coreutils git bash \
             gawk cpio swig \
             parted \
             gzip zstd xz-utils \
@@ -28,7 +28,10 @@ jobs:
 
       - name: Build and compress system image
         run: |
-          make IMAGE="archlinux-d1-${{ github.event.commits[0].id }}.img" image \
+          make \
+            IMAGE="archlinux-d1-${{ github.event.commits[0].id }}.img" \
+            SHELL="/bin/bash" \
+            image \
           && xz -z "archlinux-d1-${{ github.event.commits[0].id }}.img"
 
       - name: Upload artifacts
