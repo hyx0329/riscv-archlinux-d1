@@ -1,0 +1,39 @@
+name: Build ready-to-use ArchLinux image for AllWinner D1
+
+on:
+  push:
+    branches: [ "dev" ]
+  pull_request:
+    branches: [ "dev" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Fetch repo
+        uses: actions/checkout@v3
+
+      - name: Prepare environment
+        run: |
+          sudo apt update && sudo apt install -y \
+            build-essential coreutils git \
+            gawk cpio swig \
+            parted \
+            gzip zstd xz-utils \
+            flex bison openssl libssl-dev \
+            autoconf llvm \
+            gcc-riscv64-linux-gnu \
+            arch-install-scripts \
+            libncurses-dev libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev
+
+      - name: Build and compress system image
+        run: |
+          make IMAGE="archlinux-d1-${{ github.event.commits[0].id }}.img" image \
+          && xz -z "archlinux-d1-${{ github.event.commits[0].id }}.img"
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: system-image
+          path: archlinux-d1-${{ github.event.commits[0].id }}.img.xz
+          
