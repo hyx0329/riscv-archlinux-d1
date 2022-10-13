@@ -24,6 +24,7 @@ jobs:
             autoconf llvm \
             gcc-riscv64-linux-gnu \
             arch-install-scripts \
+            qemu-user-static binfmt-support \
             libncurses-dev libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev
 
       - name: Build and compress system image
@@ -31,6 +32,7 @@ jobs:
           make \
             IMAGE="archlinux-d1-${{ github.event.commits[0].id }}.img" \
             SHELL="/bin/bash" \
+            EXPKGS="networkmanager" \
             image \
           && xz -z "archlinux-d1-${{ github.event.commits[0].id }}.img"
 

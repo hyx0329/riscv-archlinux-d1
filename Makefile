@@ -10,6 +10,7 @@ SUDO       ?= $(if $(CI_BUILD),,sudo)
 SHELL      ?= /usr/bin/bash
 PERCENT    := %
 DEVICE     ?=
+EXPKGS     ?=
 
 SOURCE_BOOT0 ?= https://github.com/smaeul/sun20i_d1_spl
 SOURCE_OPENSBI ?= https://github.com/smaeul/opensbi
@@ -135,6 +136,13 @@ install: $(ARTIFACTS)
 	echo "generate fstab"; \
 	$(SUDO) sh -c "genfstab -U $${MOUNTPOINT} >> $${MOUNTPOINT}/etc/fstab"; \
 	cat $${MOUNTPOINT}/etc/fstab; \
+	if [ -n "$(EXPKGS)" ]; then \
+	echo "Install extra pkgs"; \
+	if which arch-chroot && which qemu-riscv64-static; then \
+	$(SUDO) arch-chroot $${MOUNTPOINT} /bin/pacman --noconfirm -Syu $(EXPKGS); \
+	else echo "not all necessary tools found, skipping"; \
+	fi; \
+	fi; \
 	echo "umount"; \
 	$(SUDO) umount $${MOUNTPOINT}/boot; \
 	$(SUDO) umount $${MOUNTPOINT}; \
@@ -182,6 +190,13 @@ $(IMAGE): $(ARTIFACTS)
 	echo "generate fstab"; \
 	$(SUDO) sh -c "genfstab -U $${MOUNTPOINT} >> $${MOUNTPOINT}/etc/fstab"; \
 	cat $${MOUNTPOINT}/etc/fstab; \
+	if [ -n "$(EXPKGS)" ]; then \
+	echo "Install extra pkgs"; \
+	if which arch-chroot && which qemu-riscv64-static; then \
+	$(SUDO) arch-chroot $${MOUNTPOINT} /bin/pacman --noconfirm -Syu $(EXPKGS); \
+	else echo "not all necessary tools found, skipping"; \
+	fi; \
+	fi; \
 	echo "umount"; \
 	$(SUDO) umount $${MOUNTPOINT}/boot; \
 	$(SUDO) umount $${MOUNTPOINT}; \

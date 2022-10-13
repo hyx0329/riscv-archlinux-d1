@@ -1,5 +1,7 @@
 # RISCV ArchLinux for Allwinner D1
 
+[![Build ready-to-use ArchLinux image for AllWinner D1](https://github.com/hyx0329/riscv-archlinux-d1/actions/workflows/build-image.yml/badge.svg)](https://github.com/hyx0329/riscv-archlinux-d1/actions/workflows/build-image.yml)
+
 An image Builder for Archlinux on an Allwinner D1 / Sipeed Lichee RV.
 
 A Makefile based reimplementation of https://github.com/sehraf/riscv-arch-image-builder
@@ -7,6 +9,8 @@ A Makefile based reimplementation of https://github.com/sehraf/riscv-arch-image-
 Just for fun ;)
 
 *Multitasking with make is really cool XD*
+
+For ready-to-use(with Network Manager installed) disk images, see the artifacts in actions.
 
 ## How to use
 
