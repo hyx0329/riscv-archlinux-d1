@@ -10,7 +10,11 @@ SUDO       ?= $(if $(CI_BUILD),,sudo)
 SHELL      ?= /usr/bin/bash
 PERCENT    := %
 DEVICE     ?=
+# Extra pkgs to install, separated by white space
+# do make sure the packages exist
 EXPKGS     ?=
+# Extra space for disk image generation, in megabytes
+EXSPACE    ?= $(if $(EXPKGS),1024,0)
 
 SOURCE_BOOT0 ?= https://github.com/smaeul/sun20i_d1_spl
 SOURCE_OPENSBI ?= https://github.com/smaeul/opensbi
@@ -140,6 +144,7 @@ install: $(ARTIFACTS)
 	echo "Install extra pkgs"; \
 	if which arch-chroot && which qemu-riscv64-static; then \
 	$(SUDO) arch-chroot $${MOUNTPOINT} /bin/pacman --noconfirm -Syu $(EXPKGS); \
+	$(SUDO) rm -rf $${MOUNTPOINT}/var/cache/pacman/pkg; \
 	else echo "not all necessary tools found, skipping"; \
 	fi; \
 	fi; \
@@ -155,11 +160,11 @@ install: $(ARTIFACTS)
 $(IMAGE): $(ARTIFACTS)
 	@echo "start building $@"
 	@echo "Prepare image at $(IMAGE)"
-	# Calculate a suitable size, 150% of the minumum (Unit MB) plus 340MB
+	# Calculate a suitable size, 150% of the minumum (Unit MB) plus 340MB plus EXSPACE
 	# Create a suitable empty file
 	ROOTFS_SIZE=$$(tar -t -v --zstd -f rootfs/$(ARCHIVE_ROOTFS) | awk '{s+=$$3} END{print int(s/1024/1024 * 1.5)}');\
 	KERNEL_SIZE=$$(tar -t -v --gzip -f "$(ARTIFACTS_OUTPUT_DIR)/kernel_package.tar.gz" | awk '{s+=$$3} END{print int(s/1024/1024 * 1.5)}');\
-	PART_SIZE=$$(echo "$${ROOTFS_SIZE} + $${KERNEL_SIZE} + 340" | bc); \
+	PART_SIZE=$$(echo "$${ROOTFS_SIZE} + $${KERNEL_SIZE} + 340 + $(EXSPACE)" | bc); \
 	dd if=/dev/zero of="$(IMAGE)" bs=1M count=$${PART_SIZE}
 	# Write partition table on it
 	parted -s -a optimal -- "$(IMAGE)" mklabel gpt
@@ -194,6 +199,7 @@ $(IMAGE): $(ARTIFACTS)
 	echo "Install extra pkgs"; \
 	if which arch-chroot && which qemu-riscv64-static; then \
 	$(SUDO) arch-chroot $${MOUNTPOINT} /bin/pacman --noconfirm -Syu $(EXPKGS); \
+	$(SUDO) rm -rf $${MOUNTPOINT}/var/cache/pacman/pkg; \
 	else echo "not all necessary tools found, skipping"; \
 	fi; \
 	fi; \
