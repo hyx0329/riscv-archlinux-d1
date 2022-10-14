@@ -24,4 +24,5 @@ For ready-to-use(with Network Manager installed) disk images, see the artifacts 
     - real packaging planned
 + build full image(which can be directly `dd` to your TF Card): `make IMAGE=/path/to/image image`
 + install to disk: `make DEVICE=/path/to/block/device install`
++ **if you have a very powerful multicore CPU, append `-j$(nproc)` to the command line to speed up the whole process :)**
 
