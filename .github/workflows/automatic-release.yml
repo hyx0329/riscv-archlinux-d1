@@ -1,0 +1,43 @@
+name: Build ready-to-use ArchLinux image for AllWinner D1
+
+on:
+  push:
+    tags:
+      - 'r*'
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Fetch repo
+        uses: actions/checkout@v3
+
+      - name: Prepare environment
+        run: |
+          sudo apt update && sudo apt install -y \
+            build-essential coreutils git bash \
+            gawk cpio swig \
+            parted \
+            gzip zstd xz-utils \
+            flex bison openssl libssl-dev \
+            autoconf llvm \
+            gcc-riscv64-linux-gnu \
+            arch-install-scripts \
+            qemu-user-static binfmt-support \
+            libncurses-dev libssl-dev dkms libelf-dev libudev-dev libpci-dev libiberty-dev
+
+      - name: Build and compress system image
+        run: |
+          make \
+            IMAGE="archlinux-d1-${{ github.event.commits[0].id }}.img" \
+            SHELL="/bin/bash" \
+            EXPKGS="networkmanager" \
+            image \
+          && xz -z "archlinux-d1-${{ github.event.commits[0].id }}.img"
+
+      - name: Create release
+        uses: ncipollo/release-action@v1
+        with:
+          artifacts: "*.img.xz,output/*"
+          body: "# Automatic Release"
+
