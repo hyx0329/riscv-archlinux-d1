@@ -19,7 +19,7 @@ u-boot/u-boot-sunxi-with-spl.bin: opensbi/build/platform/generic/firmware/fw_dyn
 	#if [ ! -d "u-boot" ]; then git clone "$(SOURCE_UBOOT)" u-boot; fi
 	#cd u-boot; git checkout $(COMMIT_UBOOT); git reset --hard $(COMMIT_UBOOT); git apply ../uboot-makefile.patch
 	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" nezha_defconfig
-	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" OPENSBI=opensbi/build/platform/generic/firmware/fw_dynamic.bin
+	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" OPENSBI=../opensbi/build/platform/generic/firmware/fw_dynamic.bin
 
 clean:
 	+if [ -d opensbi ]; then $(MAKE) -C opensbi clean; fi
