@@ -1,0 +1,14 @@
+[submodule "u-boot/opensbi"]
+	path = u-boot/opensbi
+	url = https://github.com/smaeul/opensbi
+[submodule "linux/linux"]
+	path = linux/linux
+	url = https://github.com/smaeul/linux
+	shallow = true
+	branch = d1/all
+[submodule "u-boot/u-boot"]
+	path = u-boot/u-boot
+	url = https://github.com/smaeul/u-boot
+[submodule "linux/rtl8723ds"]
+	path = linux/rtl8723ds
+	url = https://github.com/lwfinger/rtl8723ds

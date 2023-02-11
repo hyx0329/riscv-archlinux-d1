@@ -35,9 +35,13 @@ jobs:
             image \
           && xz -z "archlinux-d1-${{ github.event.commits[0].id }}.img"
 
+      - name: Extract tag annotation
+        id: tag-data
+        uses: ericcornelissen/git-tag-annotation-action@v2
+
       - name: Create release
         uses: ncipollo/release-action@v1
         with:
           artifacts: "*.img.xz,output/*"
-          body: "# Automatic Release"
+          body: ${{ steps.tag-data.outputs.git-tag-annotation }}
 

@@ -4,8 +4,7 @@
 .DEFAULT: build
 
 FILES_TO_BUILD = \
-  boot.scr \
-  u-boot.toc1
+	u-boot/u-boot-sunxi-with-spl.bin
 
 build: $(FILES_TO_BUILD)
 	@$(foreach filetobuild,$(FILES_TO_BUILD),\
@@ -16,17 +15,11 @@ opensbi/build/platform/generic/firmware/fw_dynamic.bin:
 	+$(MAKE) -C opensbi CROSS_COMPILE="$(CROSS_COMPILE)" PLATFORM=generic FW_PIC=y FW_OPTIONS=0x2
 	#cp opensbi/build/platform/generic/firmware/fw_dynamic.bin "$(OUTPUT_DIR)"
 
-u-boot/u-boot:
-	if [ ! -d "u-boot" ]; then git clone "$(SOURCE_UBOOT)" u-boot; fi
-	cd u-boot; git checkout $(COMMIT_UBOOT); git reset --hard $(COMMIT_UBOOT); git apply ../uboot-makefile.patch
+u-boot/u-boot-sunxi-with-spl.bin: opensbi/build/platform/generic/firmware/fw_dynamic.bin
+	#if [ ! -d "u-boot" ]; then git clone "$(SOURCE_UBOOT)" u-boot; fi
+	#cd u-boot; git checkout $(COMMIT_UBOOT); git reset --hard $(COMMIT_UBOOT); git apply ../uboot-makefile.patch
 	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" nezha_defconfig
-	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)"
-
-u-boot.toc1: u-boot/u-boot opensbi/build/platform/generic/firmware/fw_dynamic.bin
-	u-boot/tools/mkimage -T sunxi_toc1 -d licheerv_toc1.cfg u-boot.toc1
-
-boot.scr: u-boot/u-boot
-	u-boot/tools/mkimage -T script -C none -O linux -A "$(ARCH)" -d bootscr.txt boot.scr
+	+$(MAKE) -C u-boot CROSS_COMPILE="$(CROSS_COMPILE)" ARCH="$(ARCH)" OPENSBI=opensbi/build/platform/generic/firmware/fw_dynamic.bin
 
 clean:
 	+if [ -d opensbi ]; then $(MAKE) -C opensbi clean; fi
@@ -35,8 +28,11 @@ clean:
 	rm -f u-boot.toc1
 
 distclean:
-	rm -rf opensbi
-	rm -rf u-boot
+	#rm -rf opensbi
+	#rm -rf u-boot
 	rm -f boot.scr
 	rm -f u-boot.toc1
+	git --git-dir=opensbi/.git --work-tree=opensbi reset --hard
+	+if [ -d u-boot ]; then $(MAKE) -C u-boot distclean; fi
+	git --git-dir=u-boot/.git --work-tree=u-boot reset --hard
 

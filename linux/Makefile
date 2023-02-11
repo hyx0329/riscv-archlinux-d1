@@ -13,7 +13,7 @@ WIFI_MODULE = rtl8723ds/8723ds.ko
 
 export KERNEL WIFI_MODULE BUILD_DIR
 
-fetch-source:
+fetch-source-old:
 	if [ -d $(SOURCE_DIR) ]; then \
 	  cd $(SOURCE_DIR); \
 	 	git reset --hard $(COMMIT_LINUX); \
@@ -27,79 +27,85 @@ fetch-source:
 	fi;
 	touch $(SOURCE_DIR)/.scmversion
 
+fetch-source:
+	@echo "The source should be fetched through 'git submodule update'"
+	@$(if $(shell test -d linux && echo linux),,$(error "Submodule linux is missing!"))
+	git --git-dir=linux/.git --work-tree=linux reset --hard
+	touch linux/.scmversion
+
 patch-source: fetch-source
-	echo 'CONFIG_LOCALVERSION="$(KERNEL_LOCALVERSION)"' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_LOCALVERSION_AUTO=n' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_LOCALVERSION="$(KERNEL_LOCALVERSION)"' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_LOCALVERSION_AUTO=n' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 	# enable WiFi
-	echo 'CONFIG_WIRELESS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_CFG80211=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_WIRELESS=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_CFG80211=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 	# enable /proc/config.gz
-	echo 'CONFIG_IKCONFIG=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_IKCONFIG_PROC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_IKCONFIG=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_IKCONFIG_PROC=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 	# There is no LAN. so let there be USB-LAN
-	echo 'CONFIG_USB_NET_DRIVERS=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_CATC=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_KAWETH=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_PEGASUS=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_RTL8150=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_RTL8152=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_LAN78XX=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_USBNET=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_AX8817X=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_AX88179_178A=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CDCETHER=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CDC_EEM=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CDC_NCM=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_HUAWEI_CDC_NCM=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CDC_MBIM=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_DM9601=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_SR9700=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_SR9800=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_SMSC75XX=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_SMSC95XX=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_GL620A=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_NET1080=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_PLUSB=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_MCS7830=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_RNDIS_HOST=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CDC_SUBSET_ENABLE=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CDC_SUBSET=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_ALI_M5632=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_AN2720=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_BELKIN=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_ARMLINUX=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_EPSON2888=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_KC2190=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_ZAURUS=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CX82310_ETH=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_KALMIA=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_QMI_WWAN=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_INT51X1=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_IPHETH=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_SIERRA_NET=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_VL600=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_CH9200=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_NET_AQC111=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_USB_RTL8153_ECM=m' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_USB_NET_DRIVERS=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_CATC=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_KAWETH=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_PEGASUS=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_RTL8150=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_RTL8152=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_LAN78XX=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_USBNET=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_AX8817X=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_AX88179_178A=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CDCETHER=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CDC_EEM=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CDC_NCM=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_HUAWEI_CDC_NCM=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CDC_MBIM=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_DM9601=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_SR9700=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_SR9800=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_SMSC75XX=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_SMSC95XX=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_GL620A=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_NET1080=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_PLUSB=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_MCS7830=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_RNDIS_HOST=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CDC_SUBSET_ENABLE=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CDC_SUBSET=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_ALI_M5632=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_AN2720=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_BELKIN=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_ARMLINUX=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_EPSON2888=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_KC2190=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_ZAURUS=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CX82310_ETH=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_KALMIA=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_QMI_WWAN=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_INT51X1=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_IPHETH=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_SIERRA_NET=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_VL600=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_CH9200=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_NET_AQC111=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_USB_RTL8153_ECM=m' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 	# enable systemV IPC (needed by fakeroot during makepkg)
-	echo 'CONFIG_SYSVIPC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_SYSVIPC_SYSCTL=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_SYSVIPC=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_SYSVIPC_SYSCTL=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 	# enable swap
-	echo 'CONFIG_SWAP=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_ZSWAP=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-		        #enable Cedrus VPU Drivers
-	echo 'CONFIG_MEDIA_SUPPORT=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_MEDIA_CONTROLLER=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_MEDIA_CONTROLLER_REQUEST_API=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_V4L_MEM2MEM_DRIVERS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
-	echo 'CONFIG_VIDEO_SUNXI_CEDRUS=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_SWAP=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_ZSWAP=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	# enable Cedrus VPU Drivers
+	echo 'CONFIG_MEDIA_SUPPORT=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_MEDIA_CONTROLLER=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_MEDIA_CONTROLLER_REQUEST_API=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_V4L_MEM2MEM_DRIVERS=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
+	echo 'CONFIG_VIDEO_SUNXI_CEDRUS=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 	# enable binfmt_misc
-	echo 'CONFIG_BINFMT_MISC=y' >> $(SOURCE_DIR)/arch/riscv/configs/nezha_defconfig
+	echo 'CONFIG_BINFMT_MISC=y' >> $(SOURCE_DIR)/arch/riscv/configs/defconfig
 
 $(KERNEL):
 	+$(MAKE) patch-source
 	# prepare build directory
-	+$(MAKE) -C $(SOURCE_DIR) $(BUILD_ARGS) O=../$(BUILD_DIR) nezha_defconfig
+	+$(MAKE) -C $(SOURCE_DIR) $(BUILD_ARGS) O=../$(BUILD_DIR) defconfig
 	# build
 	+$(MAKE) -C $(BUILD_DIR) $(BUILD_ARGS)
 
@@ -107,10 +113,11 @@ $(WIFI_MODULE): $(KERNEL)
 	[ -d rtl8723ds ] || git clone https://github.com/lwfinger/rtl8723ds.git rtl8723ds
 	+$(MAKE) -C rtl8723ds $(BUILD_ARGS) KSRC=../$(BUILD_DIR) modules
 
-kernel_package.tar.gz: $(KERNEL)
+kernel_package.tar.gz: $(KERNEL) $(WIFI_MODULE)
 	fakeroot -- bash -c '\
 	set -e; \
 	K_VER=$(shell make -C ${BUILD_DIR} -s kernelversion)$(KERNEL_LOCALVERSION); \
+	[ ! -d "$(PKG_DIR)" ] || rm -rf "$(PKG_DIR)"; \
 	mkdir "$(PKG_DIR)"; \
 	install -D -o root -g root -m 755 -T "$(KERNEL)" "$(PKG_DIR)/boot/Image-$${K_VER}"; \
 	ln -s "Image-$${K_VER}" "$(PKG_DIR)/boot/Image"; \
@@ -147,10 +154,14 @@ clean-pkg:
 clean: clean-pkg
 	rm -rf $(BUILD_DIR)
 	rm -rf $(PKG_DIR)
+	make -C rtl8723ds clean
 	rm -f kernel.pkg.zst
 	rm -f kernel_package.tar.gz
 
 distclean: clean
-	rm -rf $(SOURCE_DIR)
-	rm -rf rtl8723ds
+	#rm -rf $(SOURCE_DIR)
+	#rm -rf rtl8723ds
+	git --git-dir=linux/.git --work-tree=linux reset --hard
+	git --git-dir=rtl8723ds/.git --work-tree=rtl8723ds reset --hard
+
 
