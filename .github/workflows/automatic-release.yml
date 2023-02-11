@@ -31,7 +31,7 @@ jobs:
 
       - name: Build and compress system image
         run: |
-          make \
+          make -j $(nproc) \
             IMAGE="archlinux-d1-${{ github.event.commits[0].id }}.img" \
             SHELL="/bin/bash" \
             EXPKGS="networkmanager" \
